@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.View
-import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -13,11 +13,12 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.database.FirebaseListAdapter
 import com.firebase.ui.database.FirebaseListOptions
 import com.github.library.bubbleview.BubbleTextView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,8 +27,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var activityMain: RelativeLayout
+    private lateinit var emojiconEditText: EmojiconEditText
+    private lateinit var emojiButton: ImageView
+    private lateinit var sendButton: ImageView
+    private lateinit var emojIconActions: EmojIconActions
+
     private var adapter: FirebaseListAdapter<Message>? = null
-    private lateinit var sendButton: FloatingActionButton
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -47,20 +53,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         activityMain = findViewById(R.id.activity_main)
+        emojiconEditText = findViewById(R.id.message_field)
+        emojiButton = findViewById(R.id.emoji_btn)
         sendButton = findViewById(R.id.send_btn)
-        sendButton.setOnClickListener {
-            val textField: EditText = findViewById(R.id.message_field)
-            if (textField.text.toString() == "") {
-                return@setOnClickListener
-            }
-            FirebaseDatabase.getInstance().reference.push().setValue(
-                Message(
-                    FirebaseAuth.getInstance().currentUser?.email,
-                    textField.text.toString()
-                )
-            )
-            textField.setText("")
-        }
+        emojIconActions =
+            EmojIconActions(applicationContext, activityMain, emojiconEditText, emojiButton)
+        emojIconActions.setUseSystemEmoji(true)
+        emojIconActions.ShowEmojIcon()
+
+        setListeners()
 
         if (FirebaseAuth.getInstance().currentUser == null) {
             startActivityForResult(
@@ -105,5 +106,19 @@ class MainActivity : AppCompatActivity() {
         }
         adapter!!.startListening()
         listOfMessages.adapter = adapter
+    }
+
+    private fun setListeners() {
+        sendButton.setOnClickListener {
+            FirebaseDatabase.getInstance().reference
+                .push()
+                .setValue(
+                    Message(
+                        FirebaseAuth.getInstance().currentUser?.email,
+                        emojiconEditText.text.toString()
+                    )
+                )
+            emojiconEditText.setText("")
+        }
     }
 }

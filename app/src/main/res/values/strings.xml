@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">ChatApp</string>
     <string name="message_field">Введите сообщение</string>
+    <string name="emoji_txt">emoji</string>
+    <string name="send_txt">send</string>
 </resources>
