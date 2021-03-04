@@ -3,16 +3,12 @@ package com.artx.chatapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.format.DateFormat
-import android.view.View
-import android.widget.ImageView
-import android.widget.ListView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.database.FirebaseListAdapter
-import com.firebase.ui.database.FirebaseListOptions
-import com.github.library.bubbleview.BubbleTextView
+import com.firebase.ui.database.FirebaseRecyclerAdapter
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -32,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendButton: ImageView
     private lateinit var emojIconActions: EmojIconActions
 
-    private var adapter: FirebaseListAdapter<Message>? = null
+    private var adapter: FirebaseRecyclerAdapter<Message, ViewHolder>? = null
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -78,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         if (adapter != null)
             adapter!!.startListening()
+        adapter!!.notifyDataSetChanged()
     }
 
     override fun onStop() {
@@ -87,25 +84,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayAllMessages() {
-        val listOfMessages: ListView = findViewById(R.id.message_list)
-        val query: Query = FirebaseDatabase.getInstance().reference
-        val options: FirebaseListOptions<Message> = FirebaseListOptions.Builder<Message>()
-            .setQuery(query, Message::class.java)
-            .setLayout(R.layout.list_item)
-            .build()
-        adapter = object : FirebaseListAdapter<Message>(options) {
-            override fun populateView(v: View, model: Message, position: Int) {
-                val messageUser: TextView = v.findViewById(R.id.message_user)
-                val messagePubDate: TextView = v.findViewById(R.id.message_pub_time)
-                val messageText: BubbleTextView = v.findViewById(R.id.message_text)
 
-                messageUser.text = model.userName
-                messageText.text = model.textMessage
-                messagePubDate.text = DateFormat.format("dd-MM-yyyy HH:mm:ss", model.messageTime)
-            }
-        }
+        val listOfMessages: RecyclerView = findViewById(R.id.message_list)
+        val query: Query = DataLoader.createQuery()
+        val options: FirebaseRecyclerOptions<Message> =  DataLoader.setupOptions(query)
+        adapter = DataLoader.createRecyclerViewAdapter(options)
+
+
         adapter!!.startListening()
+        listOfMessages.layoutManager = LinearLayoutManager(this)
         listOfMessages.adapter = adapter
+        adapter!!.notifyDataSetChanged()
     }
 
     private fun setListeners() {
