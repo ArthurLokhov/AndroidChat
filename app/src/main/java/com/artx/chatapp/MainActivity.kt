@@ -15,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(activityMain, "Вы авторизованы", Snackbar.LENGTH_LONG).show()
             displayAllMessages()
         }
+
     }
 
     override fun onStart() {
@@ -87,10 +89,14 @@ class MainActivity : AppCompatActivity() {
 
         val listOfMessages: RecyclerView = findViewById(R.id.message_list)
         val query: Query = DataLoader.createQuery()
-        val options: FirebaseRecyclerOptions<Message> =  DataLoader.setupOptions(query)
+        val options: FirebaseRecyclerOptions<Message> = DataLoader.setupOptions(query)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            DataLoader.getFirebaseData()
+            delay(100)
+        }
+
         adapter = DataLoader.createRecyclerViewAdapter(options)
-
-
         adapter!!.startListening()
         listOfMessages.layoutManager = LinearLayoutManager(this)
         listOfMessages.adapter = adapter
