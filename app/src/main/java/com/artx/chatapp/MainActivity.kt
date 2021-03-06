@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.auth.AuthUI
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var emojiButton: ImageView
     private lateinit var sendButton: ImageView
     private lateinit var emojIconActions: EmojIconActions
+    private lateinit var listOfMessages: RecyclerView
 
     private var adapter: FirebaseRecyclerAdapter<Message, ViewHolder>? = null
 
@@ -57,6 +59,7 @@ class MainActivity : AppCompatActivity() {
             EmojIconActions(applicationContext, activityMain, emojiconEditText, emojiButton)
         emojIconActions.setUseSystemEmoji(true)
         emojIconActions.ShowEmojIcon()
+        listOfMessages = findViewById(R.id.message_list)
 
         setListeners()
 
@@ -76,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         if (adapter != null)
             adapter!!.startListening()
-        adapter!!.notifyDataSetChanged()
     }
 
     override fun onStop() {
@@ -87,7 +89,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayAllMessages() {
 
-        val listOfMessages: RecyclerView = findViewById(R.id.message_list)
+
         val query: Query = DataLoader.createQuery()
         val options: FirebaseRecyclerOptions<Message> = DataLoader.setupOptions(query)
 
@@ -98,7 +100,9 @@ class MainActivity : AppCompatActivity() {
 
         adapter = DataLoader.createRecyclerViewAdapter(options)
         adapter!!.startListening()
-        listOfMessages.layoutManager = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.stackFromEnd = true
+        listOfMessages.layoutManager = layoutManager
         listOfMessages.adapter = adapter
         adapter!!.notifyDataSetChanged()
     }
@@ -114,6 +118,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             emojiconEditText.setText("")
+            listOfMessages.layoutManager!!.scrollToPosition(adapter!!.itemCount-1)
         }
     }
 }

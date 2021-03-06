@@ -40,12 +40,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/message_list"
         android:layout_width="match_parent"
-        android:layout_above="@id/message_field"
         android:layout_height="match_parent"
+        android:layout_above="@id/message_field"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="16dp"
-        android:stackFromBottom="true"
-        android:transcriptMode="alwaysScroll" />
+        android:layout_marginBottom="16dp" />
 
 </RelativeLayout>
